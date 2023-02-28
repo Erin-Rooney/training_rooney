@@ -11,7 +11,13 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 -my turn to pull and push
 -testing
 
+<<<<<<< HEAD
 ### This is Niki's test turn for resolving a conflict
+=======
+### Collaboration addition by Erin
+>>>>>>> 4fd52ca12b36dfccb685eec81ecdeb73206351fb
 
 - Testing
 - Testing
+
+Another change
