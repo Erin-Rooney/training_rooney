@@ -1,0 +1,87 @@
+---
+title: "RMarkdown_practice2"
+author: "Erin Rooney"
+date: "2023-02-28"
+output: html_document
+---
+
+# North Pole Environmental Bottle Chemistry
+
+[@universityoftexasatelpaso2018]
+
+[Here is the link to the data!](https://arcticdata.io/catalog/view/doi:10.18739/A25T3FZ8X "Click here")
+
+Seawater chemistry and complementary conductivity, temperature, and depth data taken from the Arctic Ocean (near the North Pole).
+
+### Insert Packages
+
+```{r message=FALSE, results='hide'}
+#knit('myfile.rmd', tangle=TRUE)
+source('code/0-packages.R')
+```
+
+
+### Read Data
+
+```{r}
+
+
+BGchem = read.csv("data/BGchem2008data.csv")
+
+
+```
+
+### Summarise Data
+
+```{r}
+colnames(BGchem)
+
+str(BGchem)
+
+head(BGchem)
+
+summary(BGchem)
+
+view(BGchem)
+```
+
+
+### Analysis
+
+### Calculate summary statistics
+```{r stats, echo = FALSE}
+
+nitrate <- mean(BGchem$NO3)
+nitrite <- mean(BGchem$NO2)
+amm <- mean(BGchem$NH4)
+phos <- mean(BGchem$P)
+
+```
+
+
+
+### Calculate mean Redfield ratio
+```{r}
+
+ratio <- (nitrate + nitrite + amm)/phos
+
+```
+
+The Redfield ratio in this data set is approximately 'r round(ratio)'
+
+### Plot Redfield ratio
+
+```{r}
+
+plot(BGchem$P, BGchem$NO2 + BGchem$NO3 + BGchem$P)
+
+```
+
+```{r BGchem, echo = FALSE}
+
+ggplot(BGchem, aes(x = CTD_Temperature, y = CTD_Depth, color = P))+
+  geom_point()+
+  scale_y_reverse()+
+  theme_bw()
+
+```

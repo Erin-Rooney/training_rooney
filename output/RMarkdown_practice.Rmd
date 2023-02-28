@@ -1,0 +1,54 @@
+---
+title: "Practice RMarkdown"
+author: "Erin Rooney"
+date: "2023-02-28"
+output: html_document
+bibliography: references.bib
+---
+
+# North Pole Environmental Bottle Chemistry
+
+[@universityoftexasatelpaso2018]
+
+[Here is the link to the data!](https://arcticdata.io/catalog/view/doi:10.18739/A25T3FZ8X "Click here")
+
+Seawater chemistry and complementary conductivity, temperature, and depth data taken from the Arctic Ocean (near the North Pole).
+
+### Read Data
+
+```{r setup, include=FALSE}
+# packages
+library(tidyverse)
+#library(drake)
+library(base)
+library(readr)
+
+
+BGchem = read.csv("data/BGchem2008data.csv")
+
+colnames(BGchem)
+
+str(BGchem)
+
+head(BGchem)
+
+
+```
+
+
+
+```{r BGchem, echo = FALSE}
+
+ggplot(BGchem, aes(x = CTD_Temperature, y = CTD_Depth, color = NO3))+
+  geom_point()+
+  scale_y_reverse()
+
+```
+
+### Analysis
+
+### Calculate summary statistics
+
+### Calculate mean Redfield ratio
+
+### Plot Redfield ratio
