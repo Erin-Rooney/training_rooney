@@ -2,7 +2,7 @@
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
-# training_rooney
+# Training Rooney
 
 ### *Coursework for ACD Reproducible Course*
 
@@ -10,3 +10,8 @@ public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostat
 
 -my turn to pull and push
 -testing
+
+### Erin's turn
+
+- Testing
+- Testing
