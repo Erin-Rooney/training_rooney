@@ -11,29 +11,28 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Arctic Data Center's Reproducible Data Course 
 
-<span style="color:blue"> *This is a website!* </span>
+<span style="color:#6d6875"> *This is a website!* </span>
 
 ### Analysis Plan
 
 - [Introduction](RMarkdown-practice2.html)
-- [Data Cleaning](data_cleaning_manipulation.Rmd)
+- [Data Cleaning](data_cleaning_manipulation.html)
 - Gap filling
 - Linear Models
 - Data Visualization
 
 
 
+<style type="text/css">
+  body {
+    background-color: #edede9;
+  }
+</style>
 
 
-body {
-background-color: #DBF9FC;
-}
 
-
-
-
-<table style="background-color:#33475b">
-<tr>
+<table style="background-color:#bde0fe">
+<tr> 
 <th>Permafrost Zone</th>
 <th>Location</th> 
 <th>Depth</th>
