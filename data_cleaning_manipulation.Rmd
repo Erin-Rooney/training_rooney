@@ -1,0 +1,242 @@
+---
+title: "Data Cleaning and Manipulation"
+author: "Erin Rooney"
+date: "2023-03-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Libraries
+
+```{r}
+
+source("code/0-packages.R")
+
+
+```
+
+## Load Data
+
+```{r}
+
+catch_original = read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+
+#for windows typically
+#catch_original = read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", method = "libcurl"))
+
+
+```
+
+## Clean Data
+
+The select command from the dplyr package selects **columns**
+
+The filter command filters **rows**
+
+```{r}
+
+#remove the All and notesRegCode columns from catch_original dataframe
+
+catch_data =
+  catch_original %>% 
+  dplyr::select(-All, -notesRegCode) 
+
+head(catch_data)
+  
+glimpse(catch_data)
+
+
+```
+
+
+Mutate Chinook so that it is numeric (not a character)
+
+```{r}
+
+catch_clean = 
+  catch_data %>% 
+  mutate(Chinook = as.numeric(Chinook))
+
+# search for the na value
+
+i = which(is.na(catch_clean$Chinook))
+
+i
+
+# located our NA value (it's an I)
+
+
+catch_clean = 
+  catch_data %>% 
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>% 
+  mutate(Chinook = as.integer(Chinook))
+
+```
+
+
+## Change shape of data use pivot longer or pivot wider
+
+```{r}
+
+catch_long = 
+  catch_clean %>% 
+  pivot_longer(cols = -c(Region, Year), names_to = "species",
+               values_to = "catch")
+
+glimpse(catch_long)
+
+
+catch_wide = 
+  catch_long %>% 
+  pivot_wider(names_from = "species", values_from = "catch")
+
+glimpse(catch_wide)
+
+```
+
+## Practice renaming columns
+
+```{r}
+catch_long =
+  catch_long %>% 
+  rename(catch_thousands = catch)
+
+glimpse(catch_long)
+  
+```
+## Adding columns with mutate function
+
+```{r}
+catch_long =
+  catch_long %>% 
+  mutate(catch = catch_thousands *1000) %>% 
+  dplyr::select(-catch_thousands)
+
+glimpse(catch_long)
+```
+
+## Practice using group_by and summarise
+
+```{r}
+
+mean_region =
+  catch_long %>% 
+  group_by(Region) %>% 
+  summarise(catch_mean = mean(catch))
+
+head(mean_region)
+
+#summarise count region
+
+n_region =
+  catch_long %>% 
+  group_by(Region) %>% 
+  summarise(count = n(),
+            total_catch = sum(catch))
+
+head(n_region)
+
+```
+
+
+## Lesson on filtering
+
+```{r}
+
+All_catch = 
+  catch_long %>% 
+  filter(Region %in% "ALU")
+
+```
+
+
+## Arrange some rows (use negative for largest to smallest and no negative for smallest to largest)
+
+```{r}
+
+mean_region =
+  catch_long %>% 
+  group_by(Region) %>% 
+  summarise(mean_catch = mean(catch)) %>% 
+  arrange(-mean_catch)
+
+head(mean_region)
+
+```
+
+## Joinin' Time
+
+load in other dataframe for left joining 
+
+```{r}
+
+region_defs = read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+
+```
+
+## Join our data
+
+```{r}
+
+catch_joined = 
+  catch_long %>% 
+  left_join(region_defs, by = c("Region" = "code"))
+
+head(catch_joined)
+
+```
+
+
+```{r}
+
+region_defs = 
+  region_defs %>% 
+  rename(Region = code, Region_Name = mgmtArea)
+
+catch_joined =
+  left_join(catch_long, region_defs, by = "Region")
+
+head(catch_joined)
+
+```
+
+## Practice with separate() and unite() 
+
+```{r}
+
+sites_df <- data.frame(site = c("HAW-101",
+                                "HAW-103",
+                                "OAH-320",
+                                "OAH-219",
+                                "MAI-039"))
+
+sites_df %>% 
+  separate(site, c("island", "site_number"), "-")
+
+
+```
+
+```{r}
+
+dates_df <- data.frame(year = c("1930",
+                                "1930",
+                                "1930"),
+                       month = c("12",
+                                "12",
+                                "12"),
+                       day = c("14",
+                               "15",
+                               "16"))
+
+dates_df %>% 
+  unite(date, year, month, day, sep = "-")
+
+```
+
+
