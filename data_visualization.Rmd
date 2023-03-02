@@ -94,7 +94,7 @@ Different col plot (faceted by species)
     #scale_fill_discrete()+
   theme_minimal()+
   theme(legend.position = "bottom",
-        legend.key.size = unit(0.5, "cm"))
+        legend.key.height = unit(0.1, "cm"))
 
 #ggsave("plot/species_allregion_escapement_plot.png", plot = species_allregion_escapement_plot, height = 6, width = 10)
 
