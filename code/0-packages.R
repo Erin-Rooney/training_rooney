@@ -10,3 +10,6 @@
 library(tidyverse)
 #library(drake)
 library(base)
+library(scales)
+library(leaflet)
+library(DT)

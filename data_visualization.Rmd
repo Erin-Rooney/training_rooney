@@ -1,0 +1,59 @@
+---
+title: "Data Visualization"
+author: "Erin Rooney"
+date: "2023-03-01"
+output: html_document
+---
+
+<style type="text/css">
+  body {
+    background-color: #f8edeb;
+  }
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries 
+```{r}
+
+source("code/0-packages.R")
+
+```
+
+## Read Data
+
+```{r}
+
+data_url = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e"
+
+esc = tryCatch(
+    read.csv("data/escapement.csv"),
+    
+error=function(cond) {
+        message(paste("Escapement file does not seem to exist, so get it from the KNB."))
+        esc = read.csv(url(data_url, method = "libcurl"))
+        return(esc)
+    }
+)
+head(esc)
+
+```
+
+```{r}
+
+esc_summarised =
+  esc %>% 
+  janitor::clean_names() %>% 
+  separate(sample_date, c("year", "month", "day"), "-") %>% 
+  mutate(year = as.numeric(year)) %>% 
+  group_by(year, species, sasap_region) %>% 
+  summarise(annual_escapement = sum(daily_count)) %>% 
+  filter(species %in% c("Chinook", "Sockeye", "Coho",
+                        "Pink"))
+
+head(esc_summarised)
+
+```
+
