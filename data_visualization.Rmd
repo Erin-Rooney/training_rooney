@@ -79,11 +79,12 @@ Different col plot (faceted by species)
 
 ```{r}
 
-esc_summarised %>% 
+# species_allregion_escapement_plot = 
+  esc_summarised %>% 
   ggplot(aes(x = species, y = annual_escapement, fill = sasap_region))+
   geom_col(position = "dodge")+
-  # scale_fill_manual(values = c("#780000", "#c1121f", "#edafb8","#f7e1d7","#dedbd2","#b0c4b1", "#4a5759", "#003049", "#669bbc"), labels = function(x) str_wrap(x, width = 10))+
-    scale_fill_manual(values = c("#780000", "#c1121f", "#edafb8","#f7e1d7","#dedbd2","#b0c4b1", "#4a5759", "#003049", "#669bbc"))+
+  scale_fill_manual(values = c("#780000", "#c1121f", "#edafb8","#f7e1d7","#dedbd2","#b0c4b1", "#4a5759", "#003049", "#669bbc"), labels = function(x) str_wrap(x, width = 10))+
+    #scale_fill_manual(values = c("#780000", "#c1121f", "#edafb8","#f7e1d7","#dedbd2","#b0c4b1", "#4a5759", "#003049", "#669bbc"))+
   labs(x = "species", 
        y = "annual escapement (count)",
        fill = "region",
@@ -91,8 +92,10 @@ esc_summarised %>%
   facet_wrap(.~species, scales = "free")+
     #scale_fill_discrete()+
   theme_minimal()+
-  theme(legend.position = "right")
+  theme(legend.position = "bottom",
+        legend.key.size = unit(0.5, "cm"))
 
+ggsave("plot/species_allregion_escapement_plot.png", plot = species_allregion_escapement_plot, height = 6, width = 8)
 
 ```
 
