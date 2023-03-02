@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 - [Data Cleaning](data_cleaning_manipulation.html)
 - Gap filling
 - Linear Models
-- Data Visualization
+- [Data Visualization](data_visualization.html)
 
 
 
