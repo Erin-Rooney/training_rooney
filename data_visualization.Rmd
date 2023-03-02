@@ -90,12 +90,13 @@ Different col plot (faceted by species)
        fill = "region",
        title = "Annual Escapement")+
   facet_wrap(.~species, scales = "free")+
+  guides(fill = guide_legend(nrow = 1))+
     #scale_fill_discrete()+
   theme_minimal()+
   theme(legend.position = "bottom",
         legend.key.size = unit(0.5, "cm"))
 
-ggsave("plot/species_allregion_escapement_plot.png", plot = species_allregion_escapement_plot, height = 6, width = 8)
+#ggsave("plot/species_allregion_escapement_plot.png", plot = species_allregion_escapement_plot, height = 6, width = 10)
 
 ```
 
