@@ -57,3 +57,103 @@ head(esc_summarised)
 
 ```
 
+## Plot Static Figures
+
+Basic 'ggplot' figure
+
+```{r}
+
+esc_summarised %>% 
+  ggplot(aes(x = species, y = annual_escapement, fill = sasap_region))+
+  geom_col(position = "dodge")+
+  labs(x = "species", 
+       y = "annual escapement (count)",
+       fill = "region")+
+  theme_minimal()
+
+
+```
+
+Different col plot (faceted by species)
+
+
+```{r}
+
+esc_summarised %>% 
+  ggplot(aes(x = species, y = annual_escapement, fill = sasap_region))+
+  geom_col(position = "dodge")+
+  # scale_fill_manual(values = c("#780000", "#c1121f", "#edafb8","#f7e1d7","#dedbd2","#b0c4b1", "#4a5759", "#003049", "#669bbc"), labels = function(x) str_wrap(x, width = 10))+
+    scale_fill_manual(values = c("#780000", "#c1121f", "#edafb8","#f7e1d7","#dedbd2","#b0c4b1", "#4a5759", "#003049", "#669bbc"))+
+  labs(x = "species", 
+       y = "annual escapement (count)",
+       fill = "region",
+       title = "Annual Escapement")+
+  facet_wrap(.~species, scales = "free")+
+    #scale_fill_discrete()+
+  theme_minimal()+
+  theme(legend.position = "right")
+
+
+```
+
+```{r}
+
+esc_summarised %>% 
+  ggplot(aes(x = year, y = annual_escapement, fill = sasap_region))+
+  geom_point(alpha = 0.6, size = 2.5, shape = c(21))+
+  labs(x = "year", 
+       y = "annual escapement (count)",
+       fill = "region")+
+  facet_wrap(.~species, scales = "free")+
+  theme_minimal()
+
+
+```
+
+
+```{r}
+
+esc_summarised %>% 
+  filter(sasap_region %in% "Kodiak") %>% 
+  ggplot(aes(x = year, y = annual_escapement, fill = species))+
+  geom_point(alpha = 0.6, size = 2.5, shape = c(21))+
+    scale_fill_manual(values = c("#edafb8","#f7e1d7","#dedbd2","#b0c4b1"))+
+  labs(x = "year", 
+       y = "annual escapement (count)",
+       fill = "species",
+       tag = "Kodiak Region")+
+  facet_wrap(.~species, scales = "free")+
+  theme_minimal()
+
+
+```
+
+
+```{r}
+
+esc_summarised %>% 
+  filter(sasap_region %in% "Kodiak") %>% 
+  ggplot(aes(x = year, y = annual_escapement, fill = species))+
+  geom_line(orientation = "x", color = "gray60")+
+  geom_point(alpha = 0.6, size = 2.5, shape = c(21))+
+  scale_fill_manual(values = c("#7678ed", "#f7b801", "#f18701", "#f35b04"))+
+  labs(x = "year", 
+       y = "annual escapement (count)",
+       fill = "species",
+       tag = "Kodiak Region")+
+  facet_wrap(.~species, scales = "free")+
+  theme_minimal()
+
+
+```
+
+
+## Saving my custom theme
+
+```{r}
+theme_er = 
+  theme_minimal+
+  theme()
+
+```
+
