@@ -1,0 +1,297 @@
+---
+title: "Geospatial Analysis with sf"
+author: "Erin Rooney"
+date: "2023-03-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## load packages
+
+```{r}
+library(sf)
+library(ggplot2)
+library(leaflet)
+library(scales)
+library(ggmap)
+library(dplyr)
+```
+
+## load data
+
+```{r}
+
+## Read in shapefile using sf
+ak_regions = read_sf("data/ak_regions_simp.shp")
+
+plot(ak_regions)  
+
+class(ak_regions)
+
+
+```
+## look at data
+
+geometry column is a special column that contains the spacial data that is needed to map the information (multi polygon)
+
+```{r}
+
+head(ak_regions)
+
+```
+
+## CRS can be projected or unprojected
+Projected = geographic coordinate system, 3D, globe
+Unprojected = defines where the data is located on the earth's surface
+
+You can view what crs is set by using the function st_crs
+
+
+## Coordinate Reference Systems (CRS)
+
+A CRS can be both unprojected and projected.
+
+Unprojected CRS aka a geographic coordinate system (GCS)
+- latitude and longitude references the earth as a 3D object
+- tells us *where* something is located on the globe
+- measured in angular units, i.e. degrees
+
+Projected CRS or projected coordinated system (PCS) or projection (for short)
+- latitude and longitude references the earth as a 2D object
+- tells us *how* to draw or create the representation on a flat surface
+- measured in linear units, i.e. meters
+
+```{r}
+
+st_crs(ak_regions)
+
+```
+
+
+GEOGCRS means it is unprojected and we need to transform it to add a projection to it so we can map it accurately
+
+CRS = EPSG code that we want to use
+
+3338 (Alaska Albers) is pretty common for mapping in Alaska
+
+```{r}
+
+ak_regions_3338 =
+  ak_regions %>%
+  st_transform(crs = 3338)
+
+st_crs(ak_regions_3338)
+
+```
+
+```{r}
+
+plot(ak_regions_3338)
+
+```
+
+## sf & the tidyverse
+
+```{r}
+ak_regions_3338 %>% 
+  select(region)
+
+# geometry column is a "sticky" column, it will stay with your dataframe even when not explicitly called
+
+```
+```{r}
+ak_regions_3338 %>% 
+  filter(region %in% "Southeast")
+
+```
+
+## spatial joins
+
+
+
+```{r}
+
+pop = read.csv("data/alaska_population.csv")
+
+
+pop_4326 = st_as_sf(pop, 
+                  coords = c('lng', 'lat'),
+                  crs = 4326,
+                  remove = F)
+
+head(pop_4326)
+
+```
+
+## assign each city to a region using 'st_join()'
+
+transform pop_4326 to crs = 3338
+
+check the .prj file (projection) for metadata to find out crs
+
+```{r}
+
+pop_3338 = st_transform(pop_4326, crs = 3338)
+
+
+pop_joined = 
+  st_join(pop_3338, ak_regions_3338, join = st_within)
+
+head(pop_joined)
+
+```
+
+## calculate total populations per region
+
+```{r}
+pop_region =
+  pop_joined %>% 
+  as.data.frame() %>% #turn it back into a dataframe
+  group_by(region) %>% 
+  summarise(total_pop = sum(population))
+
+head(pop_region)
+
+#dataframe and not a geometry thing because no sticky geometry column anymore
+
+#but we do want spatial information so now we need to left_join data
+
+
+#call it 3338 so we know it's a spatial object
+
+pop_region_3338 =
+  left_join(ak_regions_3338, pop_region)
+
+plot(pop_region_3338["total_pop"])
+
+```
+
+Plot population by Alaska management area
+
+```{r}
+
+pop_mgmt_3338 = 
+  pop_region_3338 %>% 
+  group_by(mgmt_area) %>% 
+  summarise(total_pop = sum(total_pop), do_union = FALSE)
+
+plot(pop_mgmt_3338["total_pop"])
+
+#write the shape file
+
+write_sf(pop_region_3338, "output/ak_regions_population.shp", delete_layer = TRUE)
+
+
+```
+
+
+## visualize with ggplot
+
+```{r}
+pop_region_3338 %>% 
+  ggplot()+
+  geom_sf(aes(fill = total_pop))+
+  labs(fill = "Total Population")+
+  scale_fill_continuous(low = "#6d6875", high = "#ffcdb2", labels = comma)+
+  theme_minimal()
+
+#labels by comma!!!!!!! This is so helpful!
+
+```
+
+enter  ?sf::tidyverse into the console for more info
+
+
+## add in rivers
+
+```{r read rivers shape}
+
+rivers_3338 = read_sf("data/ak_rivers_simp.shp")
+
+st_crs(rivers_3338)
+
+#PROJCRS not GEOGCRS means it is projected
+#Albers EPSG is being used
+
+#crs suggest r package?
+
+```
+
+```{r}
+
+ggplot() +
+  geom_sf(data = pop_region_3338, aes(fill = total_pop))+
+  geom_sf(data = rivers_3338, aes(linewidth = StrOrder), color = "#83c5be")+
+  geom_sf(data = pop_3338, aes(), size = .5)+
+  scale_linewidth(range = c(0.01, 0.2), guide = F)+
+  labs(fill = "Total Population")+
+  scale_fill_continuous(low = "#6d6875", high = "#ffcdb2", labels = comma)+
+  theme_minimal()
+
+```
+
+## Incorporate base maps into static maps ussing 'ggmap'
+
+```{r}
+
+source("code/6-function_mapboundingbox.R")
+
+
+pop_3857 =
+  pop_3338 %>% 
+  st_transform(crs = 3857)
+
+
+```
+
+set up base map and bounding box
+
+```{r}
+bbox = c(-170, 52, -130, 64) #roughly southern alaska
+
+ak_map = get_stamenmap(bbox, zoom = 4)
+
+ak_map_3857 = ggmap_bbox_to_3857(ak_map)
+```
+
+plot map
+
+```{r}
+ggmap(ak_map_3857)+
+  geom_sf(data = pop_3857, aes(color = population), inherit.aes = F)+
+    scale_color_continuous(low = "#6d6875", high = "#ffcdb2", labels = comma)
+
+```
+
+## Interactive maps with Leaflet
+
+```{r}
+
+epsg3338 = leaflet::leafletCRS(
+  crsClass = "L.Proj.CRS",
+  code = "EPSG:3338",
+  proj4def =  "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+  resolutions = 2^(16:7))
+
+```
+
+transform pop region 
+
+```{r}
+
+pop_region_4326 = 
+  pop_region_3338 %>% 
+  st_transform(crs = 4326)
+
+m <- leaflet(options = leafletOptions(crs = epsg3338)) %>%
+        addPolygons(data = pop_region_4326, 
+                    fillColor = "gray",
+                    weight = 1)
+
+m
+
+```
+

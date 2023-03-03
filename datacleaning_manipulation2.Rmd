@@ -1,0 +1,126 @@
+---
+title: "Practice Data Cleaning and Manipulation"
+author: "Erin Rooney"
+date: "2023-03-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## load libraries
+
+```{r}
+source("code/0-packages.R")
+library(rvest)
+library(readr)
+library(janitor)
+
+```
+
+## scraping bird code species name
+
+```{r}
+webpage = read_html("https://www.pwrc.usgs.gov/bbl/manual/speclist.cfm")
+
+tbls = html_nodes(webpage, "table") %>% 
+    html_table(fill = TRUE)
+
+species = tbls[[1]] %>% 
+    clean_names() %>% 
+    select(alpha_code, common_name) %>% 
+    mutate(alpha_code = tolower(alpha_code))
+
+```
+
+
+
+```{r}
+
+pred = read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A9ffec04c-7e2d-41dd-9e88-b6c2e8c4375e")
+
+nests = read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A982bd2fc-4edf-4da7-96ef-0d11b853102d")
+  
+
+```
+
+
+
+Source function into 
+```{r}
+
+source("code/5-function_speciescodenames.R")
+
+
+pred_names = combine_species_names(pred)
+
+nest_names = combine_species_names(nests)
+
+
+```
+
+
+
+```{r}
+
+predator_counts = 
+  pred_names %>% 
+  dplyr::select(common_name, year, count) %>% 
+  group_by(common_name, year) %>% 
+  summarise(pred_count = sum(count))
+
+unique(predator_counts$species)
+
+i = which(is.na(predator_counts$common_name))
+
+i
+
+predator_counts_naomit =
+  predator_counts %>% 
+  filter(!is.na(common_name))
+
+unique(predator_counts_naomit$common_name)
+
+
+  
+```
+
+```{r}
+
+egg_counts = 
+  nest_names %>% 
+  dplyr::select(common_name, year, number_eggs_predated) %>% 
+  group_by(common_name, year) %>% 
+  summarise(total_predated = sum(number_eggs_predated))
+
+unique(egg_counts$common_name)
+
+```
+
+```{r}
+
+all_join =
+  predator_counts_naomit %>% 
+  group_by(year) %>% 
+  summarise(pred_count2 = sum(pred_count)) %>% 
+  left_join(egg_counts, by = c("year"))
+
+install.packages("PNWColors")
+library(PNWColors)
+
+all_join %>% 
+  ggplot(aes(x = pred_count2, y = total_predated, fill = common_name))+
+  geom_point(shape = 21, size = 3, alpha = 0.6)+
+  labs(x = "predator count",
+       y = "total eggs predated (count)",
+       fill = "species, common name")+
+    scale_fill_manual(values = pnw_palette("Sailboat",13)) +
+  facet_wrap(.~common_name, ncol = 4)+
+  theme_minimal()
+
+
+```
+
+
+

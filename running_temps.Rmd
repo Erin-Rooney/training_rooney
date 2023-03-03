@@ -1,0 +1,37 @@
+---
+title: "Running temps"
+author: "Erin Rooney"
+date: "2023-03-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+source("code/0-packages.R")
+source("code/0b-ggplothelpers.R")
+source("code/2-functions.R")
+
+```
+
+
+```{r}
+
+
+ggplot(air_tempsoutput, aes(x=fahr, y=celsius, fill=kelvin)) +
+  geom_point(size = 5, alpha = 0.7, shape = 21) +
+  labs(x = "fahrenheit")+
+  scale_fill_gradientn(colors = rev(c("#f94144","#f3722c","#f8961e", "#f9c74f","#90be6d","#43aa8b","#4d908e","#577590","#277da1")))+
+  custom_theme(14)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
